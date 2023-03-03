@@ -60,7 +60,19 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     @EntityGraph(attributePaths = {"team"})
     List<Member> findAll();
 
+    // JPA Hint
     @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByUsername(String username);
+
+    // Native Query
+    @Query(value = "select * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    // Native Projection
+    @Query(value = "select m.member_id as id, m.username, t.name as teamName " +
+            "from member m left join team t",
+            countQuery = "select count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 
 }
